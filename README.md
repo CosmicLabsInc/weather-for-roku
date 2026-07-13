@@ -20,8 +20,10 @@ app remembers it, showing a clean daily forecast every time you open it.
 - **ZIP → coordinates:** bundled [U.S. Census ZCTA Gazetteer](https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html)
   (public domain), compiled into `data/zips.dat` for fast on-device lookup.
 
-No accounts, no tracking, no analytics. See [`docs/index.html`](docs/index.html)
-for the privacy policy.
+No accounts, no tracking, no analytics.
+
+- **Privacy Policy:** https://acosmicwave.github.io/weather-for-roku/privacy.html
+- **Terms of Use:** https://acosmicwave.github.io/weather-for-roku/terms.html
 
 ## Project layout
 
@@ -64,5 +66,15 @@ python3 tools/gen_marketing.py  # Streaming Store poster + screenshots
 ## Notes
 
 - Coverage is the U.S. and its territories (NWS only).
-- Update the `User-Agent` contact string in `components/WeatherTask.brs` to your
-  own email/site — the NWS API uses it to reach you if there's ever an issue.
+- The `User-Agent` in `components/WeatherTask.brs` identifies the app to the NWS
+  API (they use it to reach the maintainer if there's ever an issue).
+
+## License
+
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). You are free
+to use, modify, and share this project for any **noncommercial** purpose.
+Commercial use is not permitted under this license.
+
+## Contact
+
+weatherforroku@gmail.com
