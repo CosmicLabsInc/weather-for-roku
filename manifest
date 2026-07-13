@@ -1,0 +1,17 @@
+title=Weather
+subtitle=7-Day Forecast
+major_version=1
+minor_version=0
+build_version=013
+mm_icon_focus_fhd=pkg:/images/icon_focus_fhd.png
+mm_icon_focus_hd=pkg:/images/icon_focus_hd.png
+mm_icon_focus_sd=pkg:/images/icon_focus_sd.png
+mm_icon_side_hd=pkg:/images/icon_side_hd.png
+mm_icon_side_sd=pkg:/images/icon_side_sd.png
+splash_screen_fhd=pkg:/images/splash_fhd.png
+splash_screen_hd=pkg:/images/splash_hd.png
+splash_screen_sd=pkg:/images/splash_sd.png
+splash_min_time=3500
+splash_color=#0A1424
+ui_resolutions=hd
+supports_input_launch=1

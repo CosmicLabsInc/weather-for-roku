@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="MainScene.brs" />
+
+    <children>
+        <Poster
+            id="background"
+            width="1280"
+            height="720"
+            uri="pkg:/images/bg_gradient.png"
+            loadDisplayMode="scaleToFill" />
+
+        <!-- ================= ZIP ENTRY ================= -->
+        <Group id="zipScreen" visible="true">
+            <Poster id="entryPanel" translation="[320, 60]" width="640" height="600" uri="pkg:/images/ui/panel.png" />
+
+            <Poster id="brandIcon" translation="[592, 82]" width="96" height="96" uri="pkg:/images/brand_icon.png" loadDisplayMode="scaleToFit" />
+
+            <Label
+                id="titleLabel"
+                translation="[320, 188]"
+                width="640"
+                horizAlign="center"
+                text="Weather"
+                font="font:LargeBoldSystemFont"
+                color="0xF8FAFCFF" />
+
+            <Label
+                id="subtitleLabel"
+                translation="[320, 236]"
+                width="640"
+                horizAlign="center"
+                text="Enter your US ZIP code"
+                font="font:MediumSystemFont"
+                color="0x94A3B8FF" />
+
+            <Group id="digitGroup" translation="[462, 284]">
+                <Poster id="digitBox0" translation="[0, 0]"   width="60" height="74" uri="pkg:/images/ui/digit.png" />
+                <Poster id="digitBox1" translation="[74, 0]"  width="60" height="74" uri="pkg:/images/ui/digit.png" />
+                <Poster id="digitBox2" translation="[148, 0]" width="60" height="74" uri="pkg:/images/ui/digit.png" />
+                <Poster id="digitBox3" translation="[222, 0]" width="60" height="74" uri="pkg:/images/ui/digit.png" />
+                <Poster id="digitBox4" translation="[296, 0]" width="60" height="74" uri="pkg:/images/ui/digit.png" />
+
+                <Poster id="digitActive0" translation="[-10, -10]"  width="80" height="94" uri="pkg:/images/ui/digit_active.png" visible="false" />
+                <Poster id="digitActive1" translation="[64, -10]"   width="80" height="94" uri="pkg:/images/ui/digit_active.png" visible="false" />
+                <Poster id="digitActive2" translation="[138, -10]"  width="80" height="94" uri="pkg:/images/ui/digit_active.png" visible="false" />
+                <Poster id="digitActive3" translation="[212, -10]"  width="80" height="94" uri="pkg:/images/ui/digit_active.png" visible="false" />
+                <Poster id="digitActive4" translation="[286, -10]"  width="80" height="94" uri="pkg:/images/ui/digit_active.png" visible="false" />
+
+                <Label id="digit0" translation="[0, 0]"   width="60" height="74" horizAlign="center" vertAlign="center" font="font:LargeBoldSystemFont" color="0xF8FAFCFF" />
+                <Label id="digit1" translation="[74, 0]"  width="60" height="74" horizAlign="center" vertAlign="center" font="font:LargeBoldSystemFont" color="0xF8FAFCFF" />
+                <Label id="digit2" translation="[148, 0]" width="60" height="74" horizAlign="center" vertAlign="center" font="font:LargeBoldSystemFont" color="0xF8FAFCFF" />
+                <Label id="digit3" translation="[222, 0]" width="60" height="74" horizAlign="center" vertAlign="center" font="font:LargeBoldSystemFont" color="0xF8FAFCFF" />
+                <Label id="digit4" translation="[296, 0]" width="60" height="74" horizAlign="center" vertAlign="center" font="font:LargeBoldSystemFont" color="0xF8FAFCFF" />
+            </Group>
+
+            <NumPad id="numPad" translation="[482, 376]" />
+
+            <Label
+                id="statusLabel"
+                translation="[320, 626]"
+                width="640"
+                horizAlign="center"
+                text="Use the arrows and OK. Select GO when done."
+                font="font:SmallSystemFont"
+                color="0x64748BFF" />
+        </Group>
+
+        <!-- ================= LOADING ================= -->
+        <Group id="loadingScreen" visible="false">
+            <BusySpinner id="spinner" translation="[590, 268]" uri="pkg:/images/ui/spinner.png" />
+            <Label
+                id="loadingLabel"
+                translation="[0, 400]"
+                width="1280"
+                horizAlign="center"
+                text="Fetching your forecast..."
+                font="font:MediumSystemFont"
+                color="0x94A3B8FF" />
+            <Timer id="loadTimer" repeat="false" duration="20" />
+        </Group>
+
+        <!-- ================= FORECAST ================= -->
+        <Group id="forecastScreen" visible="false">
+            <Label
+                id="locationLabel"
+                translation="[0, 52]"
+                width="1280"
+                horizAlign="center"
+                text=""
+                font="font:LargeBoldSystemFont"
+                color="0xF8FAFCFF" />
+
+            <Label
+                id="zipLabel"
+                translation="[0, 104]"
+                width="1280"
+                horizAlign="center"
+                text=""
+                font="font:SmallSystemFont"
+                color="0x7DD3FCFF" />
+
+            <Rectangle id="headerLine" translation="[440, 146]" width="400" height="2" color="0x334155FF" opacity="0.7" />
+
+            <Group id="forecastRow" translation="[0, 178]" />
+
+            <Label
+                id="footerLabel"
+                translation="[0, 646]"
+                width="1280"
+                horizAlign="center"
+                text="Press * to change ZIP code"
+                font="font:SmallSystemFont"
+                color="0x475569FF" />
+        </Group>
+    </children>
+</component>

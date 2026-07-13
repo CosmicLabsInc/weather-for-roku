@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="DayCard" extends="Group">
+    <interface>
+        <field id="dayData" type="assocarray" onChange="onDayDataChanged" />
+    </interface>
+
+    <children>
+        <Poster
+            id="cardBg"
+            width="150"
+            height="412"
+            uri="pkg:/images/ui/card.png" />
+
+        <Label
+            id="dayLabel"
+            translation="[0, 26]"
+            width="150"
+            horizAlign="center"
+            font="font:MediumBoldSystemFont"
+            color="0xF8FAFCFF" />
+
+        <Poster
+            id="weatherIcon"
+            translation="[35, 74]"
+            width="80"
+            height="80"
+            loadDisplayMode="scaleToFit" />
+
+        <Label
+            id="conditionLabel"
+            translation="[3, 176]"
+            width="144"
+            horizAlign="center"
+            wrap="true"
+            maxLines="2"
+            lineSpacing="0"
+            font="font:SmallSystemFont"
+            color="0x94A3B8FF" />
+
+        <Label
+            id="highLabel"
+            translation="[0, 250]"
+            width="150"
+            horizAlign="center"
+            font="font:LargeBoldSystemFont"
+            color="0xF8FAFCFF" />
+
+        <Label
+            id="lowLabel"
+            translation="[0, 300]"
+            width="150"
+            horizAlign="center"
+            font="font:MediumSystemFont"
+            color="0x64748BFF" />
+
+        <Label
+            id="precipLabel"
+            translation="[0, 358]"
+            width="150"
+            horizAlign="center"
+            font="font:SmallSystemFont"
+            color="0x7DD3FCFF" />
+    </children>
+
+    <script type="text/brightscript" uri="DayCard.brs" />
+</component>

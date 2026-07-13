@@ -1,0 +1,4 @@
+weather.zip
+*.pkg
+.DS_Store
+tmp/

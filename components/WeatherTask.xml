@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="WeatherTask" extends="Task">
+    <interface>
+        <field id="zip" type="string" />
+        <field id="content" type="assocarray" alwaysNotify="true" />
+        <field id="error" type="string" alwaysNotify="true" />
+    </interface>
+    <script type="text/brightscript" uri="WeatherTask.brs" />
+</component>
