@@ -22,8 +22,8 @@ app remembers it, showing a clean daily forecast every time you open it.
 
 No accounts, no tracking, no analytics.
 
-- **Privacy Policy:** https://acosmicwave.github.io/weather-for-roku/privacy.html
-- **Terms of Use:** https://acosmicwave.github.io/weather-for-roku/terms.html
+- **Privacy Policy:** https://cosmiclabsinc.github.io/weather-for-roku/privacy.html
+- **Terms of Use:** https://cosmiclabsinc.github.io/weather-for-roku/terms.html
 
 ## Project layout
 

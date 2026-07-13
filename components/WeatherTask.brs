@@ -4,7 +4,7 @@ end sub
 
 ' Identify the app to NWS. Replace the contact with your real email/site.
 function userAgent() as string
-    return "WeatherForRoku/1.0 (https://github.com/aCosmicWave/weather-for-roku; weatherforroku@gmail.com)"
+    return "WeatherForRoku/1.0 (https://github.com/CosmicLabsInc/weather-for-roku; weatherforroku@gmail.com)"
 end function
 
 sub loadForecast()
