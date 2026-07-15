@@ -8,6 +8,8 @@ app remembers it, showing a clean daily forecast every time you open it.
 ## Features
 
 - **7-day forecast** with daily highs, lows, conditions, and chance of rain.
+- **Today's hourly outlook** — a 7-hour strip below the forecast that expands
+  from the Today tile, showing the time, conditions, and temperature.
 - **Enter your ZIP once** — it's saved locally and reused on every launch.
 - **Change location anytime** by pressing `*` on the remote.
 - **On-device ZIP lookup** — no geocoding service is contacted.
@@ -34,6 +36,7 @@ components/           SceneGraph UI + logic
   MainScene.*         Screen flow: ZIP entry, loading, forecast
   WeatherTask.*       ZIP lookup + NWS fetch (runs off the render thread)
   DayCard.*           A single day's forecast card
+  HourCell.*          A single hour in the Today hourly strip
   NumPad.*            On-screen numeric keypad
 data/zips.dat         Bundled ZIP -> lat/lon table (fixed-width, zip-sorted)
 images/               Icons, splash, UI chrome, and weather art
