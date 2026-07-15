@@ -422,6 +422,28 @@ def vgrad_rrect(w, h, radius, top, bottom):
     return out.resize((w, h), Image.LANCZOS)
 
 
+def gen_hourly_panel():
+    """Blue 'Today' panel with an upward tab centered under the Today card,
+    so the hourly strip reads as expanding out of the Today tile."""
+    W, body_h, tri_h = 1098, 116, 14
+    H = body_h + tri_h
+    top, bottom = (30, 74, 120), (20, 46, 82)
+    # 75 = Today card center relative to the panel; the Now cell is centered here too
+    tri_cx, tri_hw = 75, 22
+    s = SS
+    cw, ch = W * s, H * s
+    grad = vgrad(cw, ch, top, bottom)
+    mask = Image.new("L", (cw, ch), 0)
+    md = ImageDraw.Draw(mask)
+    md.rounded_rectangle([0, tri_h * s, cw - 1, ch - 1], radius=22 * s, fill=255)
+    md.polygon([((tri_cx - tri_hw) * s, tri_h * s),
+                ((tri_cx + tri_hw) * s, tri_h * s),
+                (tri_cx * s, 0)], fill=255)
+    out = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    out.paste(grad, (0, 0), mask)
+    return out.resize((W, H), Image.LANCZOS)
+
+
 def gen_chrome():
     rrect(640, 600, 34, (15, 23, 42, 232), border=(56, 189, 248, 40), border_w=2).save(
         os.path.join(UI, "panel.png"))
@@ -436,8 +458,9 @@ def gen_chrome():
         os.path.join(UI, "digit_active.png"))
     rrect(60, 74, 14, (17, 24, 39, 255), border=(51, 65, 85, 180), border_w=1).save(
         os.path.join(UI, "digit_filled.png"))
-    vgrad_rrect(150, 412, 22, (30, 41, 61), (22, 32, 50)).save(os.path.join(UI, "card.png"))
-    vgrad_rrect(150, 412, 22, (30, 74, 120), (20, 46, 82)).save(os.path.join(UI, "card_today.png"))
+    vgrad_rrect(150, 366, 22, (30, 41, 61), (22, 32, 50)).save(os.path.join(UI, "card.png"))
+    vgrad_rrect(150, 366, 22, (30, 74, 120), (20, 46, 82)).save(os.path.join(UI, "card_today.png"))
+    gen_hourly_panel().save(os.path.join(UI, "hourly.png"))
 
     spin = 100
     c = spin * SS

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="HourCell" extends="Group">
+    <interface>
+        <field id="hourData" type="assocarray" onChange="onHourDataChanged" />
+    </interface>
+
+    <children>
+        <!-- Content is centered on the cell's own x-origin (x = 0). -->
+        <Label
+            id="timeLabel"
+            translation="[-77, 7]"
+            width="154"
+            horizAlign="center"
+            font="font:SmallBoldSystemFont"
+            color="0xF8FAFCFF" />
+
+        <Poster
+            id="hourIcon"
+            translation="[-18, 27]"
+            width="36"
+            height="36"
+            loadDisplayMode="scaleToFit" />
+
+        <Label
+            id="tempLabel"
+            translation="[-77, 62]"
+            width="154"
+            horizAlign="center"
+            font="font:MediumBoldSystemFont"
+            color="0xF8FAFCFF" />
+
+        <Label
+            id="condLabel"
+            translation="[-77, 90]"
+            width="154"
+            horizAlign="center"
+            font="font:SmallSystemFont"
+            color="0xCBD5E1FF" />
+    </children>
+
+    <script type="text/brightscript" uri="HourCell.brs" />
+</component>

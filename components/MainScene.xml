@@ -84,7 +84,7 @@
         <Group id="forecastScreen" visible="false">
             <Label
                 id="locationLabel"
-                translation="[0, 52]"
+                translation="[0, 32]"
                 width="1280"
                 horizAlign="center"
                 text=""
@@ -93,20 +93,23 @@
 
             <Label
                 id="zipLabel"
-                translation="[0, 104]"
+                translation="[0, 78]"
                 width="1280"
                 horizAlign="center"
                 text=""
                 font="font:SmallSystemFont"
                 color="0x7DD3FCFF" />
 
-            <Rectangle id="headerLine" translation="[440, 146]" width="400" height="2" color="0x334155FF" opacity="0.7" />
+            <Group id="forecastRow" translation="[0, 112]" />
 
-            <Group id="forecastRow" translation="[0, 178]" />
+            <Group id="hourlyBar" visible="false">
+                <Poster id="hourlyPanel" translation="[91, 494]" width="1098" height="130" uri="pkg:/images/ui/hourly.png" />
+                <Group id="hourlyRow" translation="[91, 508]" />
+            </Group>
 
             <Label
                 id="footerLabel"
-                translation="[0, 646]"
+                translation="[0, 650]"
                 width="1280"
                 horizAlign="center"
                 text="Press * to change ZIP code"

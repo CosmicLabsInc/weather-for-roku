@@ -8,12 +8,12 @@
         <Poster
             id="cardBg"
             width="150"
-            height="412"
+            height="366"
             uri="pkg:/images/ui/card.png" />
 
         <Label
             id="dayLabel"
-            translation="[0, 26]"
+            translation="[0, 24]"
             width="150"
             horizAlign="center"
             font="font:MediumBoldSystemFont"
@@ -21,14 +21,14 @@
 
         <Poster
             id="weatherIcon"
-            translation="[35, 74]"
+            translation="[35, 70]"
             width="80"
             height="80"
             loadDisplayMode="scaleToFit" />
 
         <Label
             id="conditionLabel"
-            translation="[3, 176]"
+            translation="[3, 166]"
             width="144"
             horizAlign="center"
             wrap="true"
@@ -39,7 +39,7 @@
 
         <Label
             id="highLabel"
-            translation="[0, 250]"
+            translation="[0, 226]"
             width="150"
             horizAlign="center"
             font="font:LargeBoldSystemFont"
@@ -47,7 +47,7 @@
 
         <Label
             id="lowLabel"
-            translation="[0, 300]"
+            translation="[0, 280]"
             width="150"
             horizAlign="center"
             font="font:MediumSystemFont"
@@ -55,7 +55,7 @@
 
         <Label
             id="precipLabel"
-            translation="[0, 358]"
+            translation="[0, 326]"
             width="150"
             horizAlign="center"
             font="font:SmallSystemFont"

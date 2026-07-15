@@ -55,12 +55,61 @@ sub loadForecast()
         return
     end if
 
+    ' 3) Best-effort hourly forecast for the "Now + next 5 hours" strip.
+    hourly = []
+    hourlyUrl = props.forecastHourly
+    if hourlyUrl <> invalid and hourlyUrl <> ""
+        hj = fetchJson(hourlyUrl)
+        if hj <> invalid and hj.properties <> invalid and hj.properties.periods <> invalid
+            hourly = buildHourly(hj.properties.periods)
+        end if
+    end if
+
     m.top.content = {
         zip: zip
         place: placeName
         days: days
+        hourly: hourly
     }
 end sub
+
+' Build up to 7 hourly entries (now + next 6 hours) for the Today strip.
+function buildHourly(periods as object) as object
+    result = []
+    count = 0
+    for each p in periods
+        if count >= 7 then exit for
+        cls = classify(p.shortForecast)
+        result.Push({
+            timeLabel: formatHourLabel(p.startTime, count = 0)
+            isNow: (count = 0)
+            temp: intStr(p.temperature)
+            condition: cls.label
+            iconUri: cls.icon
+        })
+        count = count + 1
+    end for
+    return result
+end function
+
+' "Now" for the first entry, otherwise a 12-hour clock label like "3PM".
+function formatHourLabel(startTime as dynamic, isNow as boolean) as string
+    if isNow then return "Now"
+    if startTime = invalid or Len(startTime) < 13 then return "--"
+
+    h = Mid(startTime, 12, 2).ToInt()
+    ampm = "AM"
+    hh = h
+    if h = 0
+        hh = 12
+    else if h = 12
+        ampm = "PM"
+    else if h > 12
+        hh = h - 12
+        ampm = "PM"
+    end if
+    return Str(hh).Trim() + ampm
+end function
 
 ' Collapse NWS day/night periods into up to 7 daily high/low entries.
 function buildDays(periods as object) as object

@@ -3,6 +3,8 @@ sub init()
     m.loadingScreen = m.top.FindNode("loadingScreen")
     m.forecastScreen = m.top.FindNode("forecastScreen")
     m.forecastRow = m.top.FindNode("forecastRow")
+    m.hourlyBar = m.top.FindNode("hourlyBar")
+    m.hourlyRow = m.top.FindNode("hourlyRow")
     m.statusLabel = m.top.FindNode("statusLabel")
     m.locationLabel = m.top.FindNode("locationLabel")
     m.zipLabel = m.top.FindNode("zipLabel")
@@ -92,7 +94,7 @@ sub onNumPadKey()
             updateDigitDisplay()
             clearError()
         end if
-        focusNumPad()
+        holdNumPad()
         return
     end if
 
@@ -102,7 +104,7 @@ sub onNumPadKey()
         else
             showError("Enter all 5 digits, then select GO.")
         end if
-        focusNumPad()
+        holdNumPad()
         return
     end if
 
@@ -112,7 +114,7 @@ sub onNumPadKey()
         clearError()
     end if
 
-    focusNumPad()
+    holdNumPad()
 end sub
 
 sub showError(message as string)
@@ -127,6 +129,11 @@ end sub
 
 sub focusNumPad()
     m.numPad.callFunc("resetFocus")
+    m.numPad.SetFocus(true)
+end sub
+
+' Keep focus on the currently highlighted key (used between digit presses).
+sub holdNumPad()
     m.numPad.SetFocus(true)
 end sub
 
@@ -223,6 +230,44 @@ sub renderForecast(content as object)
         m.forecastRow.AppendChild(card)
         i = i + 1
     end for
+
+    renderHourly(content.hourly)
+end sub
+
+sub renderHourly(hourly as dynamic)
+    childCount = m.hourlyRow.getChildCount()
+    if childCount > 0
+        m.hourlyRow.removeChildrenIndex(childCount, 0)
+    end if
+
+    if hourly = invalid or hourly.Count() = 0
+        m.hourlyBar.visible = false
+        return
+    end if
+
+    ' Distribute cells evenly across the same span as the day cards so the
+    ' first ("Now") cell is centered under the Today tile (and its tab), and
+    ' the last is centered under the Sat tile. Centers are relative to the
+    ' hourly row origin (x = 91): Today center = 75, Sat center = 1023.
+    n = hourly.Count()
+    leftC = 75.0
+    rightC = 1023.0
+    if n > 1
+        pitch = (rightC - leftC) / (n - 1)
+    else
+        pitch = 0.0
+    end if
+
+    i = 0
+    for each hourData in hourly
+        cell = CreateObject("roSGNode", "HourCell")
+        cell.hourData = hourData
+        cell.translation = [Cint(leftC + i * pitch), 0]
+        m.hourlyRow.AppendChild(cell)
+        i = i + 1
+    end for
+
+    m.hourlyBar.visible = true
 end sub
 
 sub resetToZip()

@@ -68,27 +68,63 @@ SAMPLE_DAYS = [
     ("Sat", "Sunny", 86, 63, 0, False),
 ]
 
+# Today's hourly strip: (time, condition, temp, is_now)
+SAMPLE_HOURS = [
+    ("Now", "Sunny", 88, True),
+    ("3PM", "Sunny", 89, False),
+    ("4PM", "Sunny", 88, False),
+    ("5PM", "Partly Cloudy", 86, False),
+    ("6PM", "Partly Cloudy", 84, False),
+    ("7PM", "Cloudy", 82, False),
+    ("8PM", "Cloudy", 80, False),
+]
+
+CARD_Y = 112
+
 
 def draw_card(base, x, day, cond, hi, lo, precip, today):
     card = load("ui/card_today.png" if today else "ui/card.png")
-    base.alpha_composite(card, (x, 178))
+    base.alpha_composite(card, (x, CARD_Y))
     d = ImageDraw.Draw(base)
     cx = x + 75
-    ctext(d, cx, 178 + 26, day, F_MEDB, CYAN if today else WHITE)
+    ctext(d, cx, CARD_Y + 24, day, F_MEDB, CYAN if today else WHITE)
     icon = load("weather/" + ICON.get(cond, "cloudy.png")).resize((80, 80), Image.LANCZOS)
-    base.alpha_composite(icon, (x + 35, 178 + 74))
-    ctext(d, cx, 178 + 176, cond, F_SMALL, MUTED)
-    ctext(d, cx, 178 + 244, f"{hi}\u00b0", F_LARGE, WHITE)
-    ctext(d, cx, 178 + 300, f"{lo}\u00b0", F_MED, DIM)
-    ctext(d, cx, 178 + 358, f"{precip}% rain", F_SMALL, CYAN)
+    base.alpha_composite(icon, (x + 35, CARD_Y + 70))
+    ctext(d, cx, CARD_Y + 166, cond, F_SMALL, MUTED)
+    ctext(d, cx, CARD_Y + 220, f"{hi}\u00b0", F_LARGE, WHITE)
+    ctext(d, cx, CARD_Y + 280, f"{lo}\u00b0", F_MED, DIM)
+    ctext(d, cx, CARD_Y + 326, f"{precip}% rain", F_SMALL, CYAN)
+
+
+def draw_hourly(base):
+    """Today's always-on hourly strip beneath the 7-day row, in the Today-tile
+    color with a tab under the Today card so it reads as expanding out of it."""
+    d = ImageDraw.Draw(base)
+    panel = load("ui/hourly.png")  # 1098x130 with top tab
+    px, py = 91, 494
+    base.alpha_composite(panel, (px, py))
+
+    row_y = 508  # body top (below the 14px tab)
+    hi_cond = (203, 213, 225)  # light slate, readable on the blue panel
+    f_time = font(True, 21)
+    # Cell centers evenly span the day-card centers: Today=166 .. Sat=1114.
+    left_c, right_c = px + 75, px + 1023
+    n = len(SAMPLE_HOURS)
+    pitch = (right_c - left_c) / (n - 1)
+    for i, (label, cond, temp, is_now) in enumerate(SAMPLE_HOURS):
+        cx = round(left_c + i * pitch)
+        ctext(d, cx, row_y + 7, label, f_time, CYAN if is_now else WHITE)
+        icon = load("weather/" + ICON.get(cond, "cloudy.png")).resize((36, 36), Image.LANCZOS)
+        base.alpha_composite(icon, (cx - 18, row_y + 27))
+        ctext(d, cx, row_y + 62, f"{temp}\u00b0", F_MEDB, WHITE)
+        ctext(d, cx, row_y + 90, cond, F_SMALL, hi_cond)
 
 
 def screenshot_forecast():
     base = load("bg_gradient.png").resize((1280, 720), Image.LANCZOS)
     d = ImageDraw.Draw(base)
-    ctext(d, 640, 52, "Aurora, IL", F_LARGE, WHITE)
-    ctext(d, 640, 104, "ZIP 60504   \u2022   7-Day Forecast", F_SMALL, CYAN)
-    d.rectangle([440, 146, 840, 148], fill=LINE)
+    ctext(d, 640, 32, "Aurora, IL", F_LARGE, WHITE)
+    ctext(d, 640, 78, "ZIP 60504   \u2022   7-Day Forecast", F_SMALL, CYAN)
 
     n = len(SAMPLE_DAYS)
     cw, gap = 150, 8
@@ -97,7 +133,9 @@ def screenshot_forecast():
     for i, (day, cond, hi, lo, pr, today) in enumerate(SAMPLE_DAYS):
         draw_card(base, startx + i * (cw + gap), day, cond, hi, lo, pr, today)
 
-    ctext(d, 640, 646, "Press * to change ZIP code", F_SMALL, FAINT)
+    draw_hourly(base)
+
+    ctext(d, 640, 650, "Press * to change ZIP code", F_SMALL, FAINT)
     return base
 
 
