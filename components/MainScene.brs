@@ -10,6 +10,22 @@ sub init()
     m.zipLabel = m.top.FindNode("zipLabel")
     m.numPad = m.top.FindNode("numPad")
     m.loadTimer = m.top.FindNode("loadTimer")
+    m.loadingLabel = m.top.FindNode("loadingLabel")
+
+    ' Roku Pay (one-time purchase gate)
+    m.channelStore = m.top.FindNode("channelStore")
+    m.paywallScreen = m.top.FindNode("paywallScreen")
+    m.paywallPrice = m.top.FindNode("paywallPrice")
+    m.paywallStatus = m.top.FindNode("paywallStatus")
+    m.payFocus = m.top.FindNode("payFocus")
+    m.payLabel0 = m.top.FindNode("payLabel0")
+    m.payLabel1 = m.top.FindNode("payLabel1")
+    ' The product "code" is the Product Identifier set in the Developer Dashboard.
+    m.productCode = "WEATHER_FULL"
+    m.priceText = "$2.99"       ' fallback until the live catalog price loads
+    m.catalogLoaded = false
+    m.restoring = false
+    m.payIndex = 0
 
     m.statusHint = "Use the arrows and OK. Select GO when done."
 
@@ -43,8 +59,178 @@ sub init()
 
     m.numPad.observeField("keyPressed", "onNumPadKey")
     m.loadTimer.observeField("fire", "onLoadTimeout")
+
+    m.channelStore.observeField("purchases", "onPurchases")
+    m.channelStore.observeField("catalog", "onCatalog")
+    m.channelStore.observeField("orderStatus", "onOrderStatus")
+
     m.top.SetFocus(true)
 
+    ' Gate the app behind the one-time purchase before doing anything else.
+    checkEntitlement()
+end sub
+
+' ---- Roku Pay entitlement gate ------------------------------------------
+
+sub checkEntitlement()
+    ' Local fast-path: if we've already recorded ownership on this device.
+    if getOwnedFlag()
+        startApp()
+        return
+    end if
+
+    m.loadingLabel.text = "Loading..."
+    showScreen("loading")
+    m.channelStore.command = "getPurchases"
+end sub
+
+sub onPurchases()
+    entitled = hasEntitlement(m.channelStore.purchases)
+
+    if entitled
+        setOwnedFlag(true)
+        startApp()
+        return
+    end if
+
+    if m.restoring
+        m.restoring = false
+        m.paywallStatus.text = "No previous purchase found on this Roku account."
+    end if
+
+    ' Load the live price once before showing the paywall.
+    if m.catalogLoaded
+        showPaywall()
+    else
+        m.channelStore.command = "getCatalog"
+    end if
+end sub
+
+' Pull the localized price from the store catalog so we never hardcode it.
+sub onCatalog()
+    m.catalogLoaded = true
+    cost = findCost(m.channelStore.catalog)
+    if cost <> "" then m.priceText = cost
+    applyPrice()
+    showPaywall()
+end sub
+
+function findCost(catalogNode as dynamic) as string
+    if catalogNode = invalid then return ""
+    kids = catalogNode.getChildren(-1, 0)
+    if kids = invalid then return ""
+
+    ' Prefer the product matching our code.
+    for each c in kids
+        if c <> invalid and c.code <> invalid and LCase(c.code) = LCase(m.productCode)
+            if c.cost <> invalid and c.cost <> "" then return c.cost
+        end if
+    end for
+    ' Otherwise, the first product that has a price.
+    for each c in kids
+        if c <> invalid and c.cost <> invalid and c.cost <> "" then return c.cost
+    end for
+    return ""
+end function
+
+sub applyPrice()
+    m.payLabel0.text = "Unlock for " + m.priceText
+    m.paywallPrice.text = m.priceText + " one-time \u2014 yours forever, no subscription"
+end sub
+
+' Single-product channel: any returned purchase item (with a product code)
+' means the user owns the app.
+function hasEntitlement(purchasesNode as dynamic) as boolean
+    if purchasesNode = invalid then return false
+    kids = purchasesNode.getChildren(-1, 0)
+    if kids = invalid then return false
+    for each child in kids
+        if child <> invalid and child.code <> invalid and child.code <> ""
+            return true
+        end if
+    end for
+    return false
+end function
+
+sub showPaywall()
+    applyPrice()
+    showScreen("paywall")
+    m.payIndex = 0
+    updatePayFocus()
+    m.top.SetFocus(true)
+end sub
+
+' Move the cyan focus highlight over the selected button and swap label colors.
+sub updatePayFocus()
+    if m.payIndex = 0
+        m.payFocus.translation = [-12, -12]
+        m.payLabel0.color = "0x0B1220FF"
+        m.payLabel1.color = "0xF8FAFCFF"
+    else
+        m.payFocus.translation = [-12, 68]
+        m.payLabel0.color = "0xF8FAFCFF"
+        m.payLabel1.color = "0x0B1220FF"
+    end if
+end sub
+
+sub startPurchase()
+    m.paywallStatus.text = "Opening checkout..."
+
+    order = CreateObject("roSGNode", "ContentNode")
+    item = order.CreateChild("ContentNode")
+    item.addFields({ code: m.productCode, qty: 1 })
+    m.channelStore.order = order
+    m.channelStore.command = "doOrder"
+end sub
+
+sub onOrderStatus()
+    status = m.channelStore.orderStatus
+    code = invalid
+    if status <> invalid then code = status.status
+
+    if code = 1
+        setOwnedFlag(true)
+        startApp()
+    else if code = 2
+        m.paywallStatus.text = "Purchase canceled."
+        m.payIndex = 0
+        updatePayFocus()
+        m.top.SetFocus(true)
+    else
+        m.paywallStatus.text = "Purchase didn't complete. Please try again."
+        m.payIndex = 0
+        updatePayFocus()
+        m.top.SetFocus(true)
+    end if
+end sub
+
+sub restorePurchase()
+    m.restoring = true
+    m.paywallStatus.text = "Restoring..."
+    m.channelStore.command = "getPurchases"
+end sub
+
+function getOwnedFlag() as boolean
+    section = CreateObject("roRegistrySection", "weather")
+    if section.Exists("owned")
+        return (section.Read("owned") = "1")
+    end if
+    return false
+end function
+
+sub setOwnedFlag(owned as boolean)
+    section = CreateObject("roRegistrySection", "weather")
+    if owned
+        section.Write("owned", "1")
+    else
+        section.Delete("owned")
+    end if
+    section.Flush()
+end sub
+
+' ---- Normal app flow (only reached once entitled) -----------------------
+
+sub startApp()
     savedZip = getSavedZip()
     if savedZip <> invalid and Len(savedZip) = 5
         m.digits = savedZip
@@ -73,6 +259,30 @@ end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
+
+    if m.screen = "paywall"
+        if key = "up"
+            if m.payIndex > 0
+                m.payIndex = 0
+                updatePayFocus()
+            end if
+            return true
+        else if key = "down"
+            if m.payIndex < 1
+                m.payIndex = 1
+                updatePayFocus()
+            end if
+            return true
+        else if key = "OK"
+            if m.payIndex = 0
+                startPurchase()
+            else
+                restorePurchase()
+            end if
+            return true
+        end if
+        return true
+    end if
 
     if m.screen = "forecast"
         if key = "options"
@@ -153,6 +363,7 @@ end sub
 
 sub fetchForecast(zip as string)
     clearError()
+    m.loadingLabel.text = "Fetching your forecast..."
     showScreen("loading")
 
     if m.weatherTask <> invalid
@@ -280,6 +491,7 @@ end sub
 
 sub showScreen(name as string)
     m.screen = name
+    m.paywallScreen.visible = (name = "paywall")
     m.zipScreen.visible = (name = "zip")
     m.loadingScreen.visible = (name = "loading")
     m.forecastScreen.visible = (name = "forecast")

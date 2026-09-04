@@ -461,6 +461,10 @@ def gen_chrome():
     vgrad_rrect(150, 366, 22, (30, 41, 61), (22, 32, 50)).save(os.path.join(UI, "card.png"))
     vgrad_rrect(150, 366, 22, (30, 74, 120), (20, 46, 82)).save(os.path.join(UI, "card_today.png"))
     gen_hourly_panel().save(os.path.join(UI, "hourly.png"))
+    rrect(360, 64, 18, (30, 41, 59, 255), border=(71, 85, 105, 200), border_w=1).save(
+        os.path.join(UI, "pay_btn.png"))
+    rrect_glow(384, 88, 18, (14, 165, 233, 255), (56, 189, 248, 130), glow_pad=12).save(
+        os.path.join(UI, "pay_btn_focus.png"))
 
     spin = 100
     c = spin * SS

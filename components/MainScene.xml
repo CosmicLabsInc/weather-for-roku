@@ -10,8 +10,63 @@
             uri="pkg:/images/bg_gradient.png"
             loadDisplayMode="scaleToFill" />
 
+        <ChannelStore id="channelStore" />
+
+        <!-- ================= PAYWALL ================= -->
+        <Group id="paywallScreen" visible="false">
+            <Poster id="paywallPanel" translation="[320, 60]" width="640" height="600" uri="pkg:/images/ui/panel.png" />
+
+            <Poster id="paywallIcon" translation="[592, 96]" width="96" height="96" uri="pkg:/images/brand_icon.png" loadDisplayMode="scaleToFit" />
+
+            <Label
+                id="paywallTitle"
+                translation="[320, 206]"
+                width="640"
+                horizAlign="center"
+                text="Weather"
+                font="font:LargeBoldSystemFont"
+                color="0xF8FAFCFF" />
+
+            <Label
+                id="paywallSubtitle"
+                translation="[320, 258]"
+                width="640"
+                horizAlign="center"
+                text="Unlock the full ad-free forecast"
+                font="font:MediumSystemFont"
+                color="0x94A3B8FF" />
+
+            <Label
+                id="paywallPrice"
+                translation="[320, 312]"
+                width="640"
+                horizAlign="center"
+                text="One-time purchase — yours forever, no subscription"
+                font="font:SmallSystemFont"
+                color="0x7DD3FCFF" />
+
+            <Group id="payButtons" translation="[460, 372]">
+                <Poster id="payBg0" translation="[0, 0]"  width="360" height="64" uri="pkg:/images/ui/pay_btn.png" />
+                <Poster id="payBg1" translation="[0, 80]" width="360" height="64" uri="pkg:/images/ui/pay_btn.png" />
+
+                <Poster id="payFocus" translation="[-12, -12]" width="384" height="88" uri="pkg:/images/ui/pay_btn_focus.png" />
+
+                <Label id="payLabel0" translation="[0, 0]"  width="360" height="64" horizAlign="center" vertAlign="center" font="font:MediumBoldSystemFont" text="Unlock" color="0x0B1220FF" />
+                <Label id="payLabel1" translation="[0, 80]" width="360" height="64" horizAlign="center" vertAlign="center" font="font:MediumBoldSystemFont" text="Restore purchase" color="0xF8FAFCFF" />
+            </Group>
+
+            <Label
+                id="paywallStatus"
+                translation="[320, 566]"
+                width="640"
+                horizAlign="center"
+                text=""
+                font="font:SmallSystemFont"
+                color="0x64748BFF" />
+        </Group>
+
         <!-- ================= ZIP ENTRY ================= -->
-        <Group id="zipScreen" visible="true">
+        <Group id="zipScreen" visible="false">
             <Poster id="entryPanel" translation="[320, 60]" width="640" height="600" uri="pkg:/images/ui/panel.png" />
 
             <Poster id="brandIcon" translation="[592, 82]" width="96" height="96" uri="pkg:/images/brand_icon.png" loadDisplayMode="scaleToFit" />
@@ -67,7 +122,7 @@
         </Group>
 
         <!-- ================= LOADING ================= -->
-        <Group id="loadingScreen" visible="false">
+        <Group id="loadingScreen" visible="true">
             <BusySpinner id="spinner" translation="[590, 268]" uri="pkg:/images/ui/spinner.png" />
             <Label
                 id="loadingLabel"

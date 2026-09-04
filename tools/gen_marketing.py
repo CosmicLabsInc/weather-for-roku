@@ -238,6 +238,48 @@ def poster():
     return base.convert("RGB")
 
 
+def draw_button(base, x, y, w, h, text, focused):
+    from PIL import ImageFilter
+    r = 18
+    if focused:
+        glow = Image.new("RGBA", base.size, (0, 0, 0, 0))
+        gd = ImageDraw.Draw(glow)
+        gd.rounded_rectangle([x - 8, y - 8, x + w + 8, y + h + 8], radius=r + 8,
+                             fill=(56, 189, 248, 95))
+        glow = glow.filter(ImageFilter.GaussianBlur(11))
+        base.alpha_composite(glow)
+        d = ImageDraw.Draw(base)
+        d.rounded_rectangle([x, y, x + w, y + h], radius=r, fill=(14, 165, 233, 255))
+        tc = (11, 18, 32)
+    else:
+        d = ImageDraw.Draw(base)
+        d.rounded_rectangle([x, y, x + w, y + h], radius=r, fill=(30, 41, 59, 255),
+                            outline=(71, 85, 105, 255), width=1)
+        tc = WHITE
+    b = d.textbbox((0, 0), text, font=F_MEDB)
+    d.text((x + w / 2 - (b[2] - b[0]) / 2 - b[0], y + h / 2 - (b[3] - b[1]) / 2 - b[1]),
+           text, font=F_MEDB, fill=tc)
+
+
+def screenshot_paywall(focus_restore=False):
+    base = load("bg_gradient.png").resize((1280, 720), Image.LANCZOS)
+    base.alpha_composite(load("ui/panel.png").resize((640, 600)), (320, 60))
+    base.alpha_composite(load("brand_icon.png").resize((96, 96)), (592, 96))
+    d = ImageDraw.Draw(base)
+    ctext(d, 640, 206, "Weather", F_LARGE, WHITE)
+    ctext(d, 640, 258, "Unlock the full ad-free forecast", F_MED, MUTED)
+    ctext(d, 640, 312, "$2.99 one-time \u2014 yours forever, no subscription", F_SMALL, CYAN)
+
+    bw, bh, gap = 360, 64, 16
+    bx = 640 - bw // 2
+    draw_button(base, bx, 372, bw, bh, "Unlock for $2.99", focused=not focus_restore)
+    draw_button(base, bx, 372 + bh + gap, bw, bh, "Restore purchase", focused=focus_restore)
+
+    d = ImageDraw.Draw(base)
+    ctext(d, 640, 566, "Secure checkout with Roku Pay", F_SMALL, DIM)
+    return base
+
+
 def screenshot_loading():
     base = load("bg_gradient.png").resize((1280, 720), Image.LANCZOS)
     spin = load("ui/spinner.png").resize((100, 100), Image.LANCZOS)
@@ -299,6 +341,8 @@ def save_shot(img720, name):
 if __name__ == "__main__":
     save_shot(screenshot_forecast(), "screenshot_forecast")
     save_shot(screenshot_zip(), "screenshot_zip")
+    save_shot(screenshot_paywall(), "screenshot_paywall")
+    save_shot(screenshot_paywall(focus_restore=True), "screenshot_paywall_restore")
     save_shot(screenshot_loading(), "screenshot_loading")
     app_poster().save(os.path.join(OUT, "app_poster_540x405.png"))
     poster().save(os.path.join(OUT, "promo_16x9.png"))
