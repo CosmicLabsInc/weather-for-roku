@@ -372,7 +372,8 @@ function onKeyEvent(key as string, press as boolean) as boolean
             end if
             return true
         end if
-        return true
+        ' Let Back/Home propagate so the user can always exit from the paywall.
+        return false
     end if
 
     if m.screen = "forecast"
