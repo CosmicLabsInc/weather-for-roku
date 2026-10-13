@@ -2,6 +2,24 @@
 
 All notable changes to Weather for Roku are documented here.
 
+## [Unreleased]
+
+### Changed
+- **Entitlement gate is now catalog-first and fails open.** On launch the app
+  checks the store catalog: if the product and its price can't be retrieved,
+  the full app runs for free (no paywall). If they can, it checks for an
+  existing purchase — owners get the full app, everyone else sees the purchase
+  flow. A short safety timeout unlocks the app if the store never responds, so
+  users are never trapped on a loading screen.
+
+### Fixed
+- Paywall price no longer falls back to an unrelated `$0.00` placeholder
+  product; it trusts only the configured product's price.
+- Em dash in the paywall subtitle now renders correctly (BrightScript doesn't
+  support `\u` escapes).
+- Suppressed a spurious "Order failed" status the store observer emits on
+  launch before any purchase is attempted.
+
 ## [1.1.0] — 2026-07-15
 
 ### Added

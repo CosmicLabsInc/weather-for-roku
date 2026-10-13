@@ -10,6 +10,7 @@ sub init()
     m.zipLabel = m.top.FindNode("zipLabel")
     m.numPad = m.top.FindNode("numPad")
     m.loadTimer = m.top.FindNode("loadTimer")
+    m.entitlementTimer = m.top.FindNode("entitlementTimer")
     m.loadingLabel = m.top.FindNode("loadingLabel")
 
     ' Roku Pay (one-time purchase gate)
@@ -23,9 +24,9 @@ sub init()
     ' The product "code" is the Product Identifier set in the Developer Dashboard.
     m.productCode = "WEATHER_FULL"
     m.priceText = "$2.99"       ' fallback until the live catalog price loads
-    m.catalogLoaded = false
     m.restoring = false
     m.payIndex = 0
+    m.entitlementResolved = false   ' guards against double-resolving the gate
 
     m.statusHint = "Use the arrows and OK. Select GO when done."
 
@@ -59,6 +60,9 @@ sub init()
 
     m.numPad.observeField("keyPressed", "onNumPadKey")
     m.loadTimer.observeField("fire", "onLoadTimeout")
+    m.entitlementTimer.observeField("fire", "onEntitlementTimeout")
+
+    m.ordering = false   ' true only while a doOrder is in flight
 
     m.channelStore.observeField("purchases", "onPurchases")
     m.channelStore.observeField("catalog", "onCatalog")
@@ -72,8 +76,16 @@ end sub
 
 ' ---- Roku Pay entitlement gate ------------------------------------------
 
+' Entitlement gate, in order:
+'   1. If this device already recorded ownership -> full app.
+'   2. Otherwise ask the store for the catalog.
+'        - If OUR product + price can't be retrieved -> the app isn't sellable
+'          here, so unlock the full app (fail open, no payment).
+'        - If it can be retrieved -> check whether the account already owns it.
+'            * owned      -> full app
+'            * not owned  -> purchase flow
 sub checkEntitlement()
-    ' Local fast-path: if we've already recorded ownership on this device.
+    ' Local fast-path: ownership already recorded on this device.
     if getOwnedFlag()
         startApp()
         return
@@ -81,15 +93,49 @@ sub checkEntitlement()
 
     m.loadingLabel.text = "Loading..."
     showScreen("loading")
+
+    ' Safety net: if the store never responds, don't trap the user -> unlock.
+    m.entitlementTimer.control = "start"
+
+    ' Step 1: can we even retrieve the product and its price?
+    m.channelStore.command = "getCatalog"
+end sub
+
+' getCatalog came back: decide whether the app is sellable on this device.
+sub onCatalog()
+    if m.entitlementResolved then return
+
+    cost = findCost(m.channelStore.catalog)
+
+    if cost = ""
+        ' Product / price unavailable (wrong account, not propagated, no
+        ' network, etc.). We can't sell it, so run the full app for free.
+        m.entitlementTimer.control = "stop"
+        unlockFull()
+        return
+    end if
+
+    ' Product is sellable: remember its live price for the paywall...
+    m.priceText = cost
+    applyPrice()
+
+    ' ...then find out whether this account already purchased it.
     m.channelStore.command = "getPurchases"
 end sub
 
+' getPurchases came back (only reached when the product IS sellable).
 sub onPurchases()
     entitled = hasEntitlement(m.channelStore.purchases)
 
     if entitled
+        m.entitlementTimer.control = "stop"
         setOwnedFlag(true)
-        startApp()
+        if m.entitlementResolved
+            ' Reached via "Restore purchase" after the paywall was shown.
+            startApp()
+        else
+            unlockFull()   ' already purchased on this account
+        end if
         return
     end if
 
@@ -98,21 +144,23 @@ sub onPurchases()
         m.paywallStatus.text = "No previous purchase found on this Roku account."
     end if
 
-    ' Load the live price once before showing the paywall.
-    if m.catalogLoaded
-        showPaywall()
-    else
-        m.channelStore.command = "getCatalog"
-    end if
+    ' Not owned and the product is for sale -> show the purchase flow.
+    m.entitlementTimer.control = "stop"
+    m.entitlementResolved = true
+    showPaywall()
 end sub
 
-' Pull the localized price from the store catalog so we never hardcode it.
-sub onCatalog()
-    m.catalogLoaded = true
-    cost = findCost(m.channelStore.catalog)
-    if cost <> "" then m.priceText = cost
-    applyPrice()
-    showPaywall()
+' Store didn't answer in time -> fail open and run the full app.
+sub onEntitlementTimeout()
+    if m.entitlementResolved then return
+    unlockFull()   ' store timed out
+end sub
+
+' Resolve the gate exactly once and launch the full experience.
+sub unlockFull()
+    if m.entitlementResolved then return
+    m.entitlementResolved = true
+    startApp()
 end sub
 
 function findCost(catalogNode as dynamic) as string
@@ -120,22 +168,20 @@ function findCost(catalogNode as dynamic) as string
     kids = catalogNode.getChildren(-1, 0)
     if kids = invalid then return ""
 
-    ' Prefer the product matching our code.
+    ' Only trust the price for OUR product. Matching "first product with any
+    ' price" would pick up Roku's sandbox placeholder products ($0.00) whenever
+    ' the real product isn't in the catalog, so we never fall back like that.
     for each c in kids
         if c <> invalid and c.code <> invalid and LCase(c.code) = LCase(m.productCode)
             if c.cost <> invalid and c.cost <> "" then return c.cost
         end if
-    end for
-    ' Otherwise, the first product that has a price.
-    for each c in kids
-        if c <> invalid and c.cost <> invalid and c.cost <> "" then return c.cost
     end for
     return ""
 end function
 
 sub applyPrice()
     m.payLabel0.text = "Unlock for " + m.priceText
-    m.paywallPrice.text = m.priceText + " one-time \u2014 yours forever, no subscription"
+    m.paywallPrice.text = m.priceText + " one-time " + Chr(8212) + " yours forever, no subscription"
 end sub
 
 ' Single-product channel: any returned purchase item (with a product code)
@@ -174,6 +220,7 @@ sub updatePayFocus()
 end sub
 
 sub startPurchase()
+    m.ordering = true
     m.paywallStatus.text = "Opening checkout..."
 
     order = CreateObject("roSGNode", "ContentNode")
@@ -184,6 +231,11 @@ sub startPurchase()
 end sub
 
 sub onOrderStatus()
+    ' Ignore the spurious initial callback the observer fires on launch;
+    ' only react to a status change when we actually started a purchase.
+    if not m.ordering then return
+    m.ordering = false
+
     status = m.channelStore.orderStatus
     code = invalid
     if status <> invalid then code = status.status

@@ -133,6 +133,7 @@
                 font="font:MediumSystemFont"
                 color="0x94A3B8FF" />
             <Timer id="loadTimer" repeat="false" duration="20" />
+            <Timer id="entitlementTimer" repeat="false" duration="8" />
         </Group>
 
         <!-- ================= FORECAST ================= -->
