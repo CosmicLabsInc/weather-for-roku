@@ -91,6 +91,13 @@ sub checkEntitlement()
         return
     end if
 
+    ' Free trial: the first 30 days after install are free with no purchase
+    ' prompt. Only after the trial expires do we run the monetization flow.
+    if inFreeTrial()
+        startApp()
+        return
+    end if
+
     m.loadingLabel.text = "Loading..."
     showScreen("loading")
 
@@ -261,6 +268,38 @@ sub restorePurchase()
     m.paywallStatus.text = "Restoring..."
     m.channelStore.command = "getPurchases"
 end sub
+
+' ---- Free trial ---------------------------------------------------------
+
+' True while we're still inside the 30-day free window. The install date is
+' recorded the first time this runs, so the clock starts at first launch.
+function inFreeTrial() as boolean
+    TRIAL_DAYS = 30
+    nowSecs = CreateObject("roDateTime").AsSeconds()
+    installSecs = getInstallTimestamp()
+
+    ' Guard against a bad/absent clock: if we can't trust "now", stay in the
+    ' trial rather than charging the user on a glitch.
+    if nowSecs <= 0 or installSecs <= 0 then return true
+    if nowSecs < installSecs then return true   ' clock moved backwards
+
+    elapsedDays = (nowSecs - installSecs) / 86400
+    return (elapsedDays < TRIAL_DAYS)
+end function
+
+' Reads the stored install time (epoch seconds); records "now" on first call.
+function getInstallTimestamp() as integer
+    section = CreateObject("roRegistrySection", "weather")
+    if section.Exists("install_ts")
+        ts = section.Read("install_ts").ToInt()
+        if ts > 0 then return ts
+    end if
+
+    nowSecs = CreateObject("roDateTime").AsSeconds()
+    section.Write("install_ts", nowSecs.ToStr())
+    section.Flush()
+    return nowSecs
+end function
 
 function getOwnedFlag() as boolean
     section = CreateObject("roRegistrySection", "weather")

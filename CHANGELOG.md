@@ -4,6 +4,14 @@ All notable changes to Weather for Roku are documented here.
 
 ## [Unreleased]
 
+### Added
+- **30-day free trial.** The first 30 days after install are completely free
+  with no purchase prompt; the monetization flow only begins once the trial
+  expires. The install date is recorded on first launch, and the app stays in
+  the trial if the device clock is missing or invalid.
+- Declared `rsg_version=1.3` in the manifest (required for Channel Store
+  submission).
+
 ### Changed
 - **Entitlement gate is now catalog-first and fails open.** On launch the app
   checks the store catalog: if the product and its price can't be retrieved,
