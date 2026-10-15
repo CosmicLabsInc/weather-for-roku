@@ -27,6 +27,15 @@ All notable changes to Weather for Roku are documented here.
   support `\u` escapes).
 - Suppressed a spurious "Order failed" status the store observer emits on
   launch before any purchase is attempted.
+- **Entitlement race on slow networks.** A late `getPurchases` response that
+  arrived after the safety timeout had already unlocked the app could pop the
+  paywall over the running app (or re-launch it). Late store responses are now
+  ignored once the gate is resolved, while user-initiated "Restore purchase"
+  still works.
+- The safety timeout is now re-armed for the purchase-lookup step so a slow
+  catalog followed by a slow purchases lookup no longer unlocks the app for
+  free prematurely.
+- "Restore purchase" now clears its in-progress flag on success.
 
 ## [1.1.0] — 2026-07-15
 

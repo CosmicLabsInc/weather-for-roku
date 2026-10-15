@@ -126,16 +126,29 @@ sub onCatalog()
     m.priceText = cost
     applyPrice()
 
+    ' Re-arm the safety timer so the getPurchases phase gets its own full
+    ' window instead of sharing getCatalog's. Without this, a slow catalog +
+    ' slow purchases lookup could exceed the single 8s budget and fail the
+    ' user open (unlock for free) even when the store was about to answer.
+    m.entitlementTimer.control = "start"
+
     ' ...then find out whether this account already purchased it.
     m.channelStore.command = "getPurchases"
 end sub
 
-' getPurchases came back (only reached when the product IS sellable).
+' getPurchases came back. This fires for the initial gate check AND for an
+' explicit "Restore purchase". Ignore a late response that lands after the
+' safety timeout already resolved the gate (otherwise the paywall could pop
+' over the already-running app, or startApp would run twice) -- but never
+' ignore a user-initiated restore, which legitimately runs post-resolution.
 sub onPurchases()
+    if m.entitlementResolved and not m.restoring then return
+
     entitled = hasEntitlement(m.channelStore.purchases)
 
     if entitled
         m.entitlementTimer.control = "stop"
+        m.restoring = false
         setOwnedFlag(true)
         if m.entitlementResolved
             ' Reached via "Restore purchase" after the paywall was shown.
