@@ -5,7 +5,7 @@ All notable changes to Weather for Roku are documented here.
 ## [Unreleased]
 
 ### Added
-- **30-day free trial.** The first 30 days after install are completely free
+- **7-day free trial.** The first 7 days after install are completely free
   with no purchase prompt; the monetization flow only begins once the trial
   expires. The install date is recorded on first launch, and the app stays in
   the trial if the device clock is missing or invalid.

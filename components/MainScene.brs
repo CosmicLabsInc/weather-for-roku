@@ -284,10 +284,10 @@ end sub
 
 ' ---- Free trial ---------------------------------------------------------
 
-' True while we're still inside the 30-day free window. The install date is
+' True while we're still inside the 7-day free window. The install date is
 ' recorded the first time this runs, so the clock starts at first launch.
 function inFreeTrial() as boolean
-    TRIAL_DAYS = 30
+    TRIAL_DAYS = 7
     nowSecs = CreateObject("roDateTime").AsSeconds()
     installSecs = getInstallTimestamp()
 
